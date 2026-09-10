@@ -1,75 +1,215 @@
 /**
- * Procedural ambient sound sources via Web Audio API.
- * Each factory returns { connect(dest), start(), stop(), dispose() }.
+ * Sample-based ambient voices via Web Audio API.
+ * Loops from Freesound (see public/sounds/SOURCES.json).
+ * Each factory returns { connect(dest), prepare(), start(), stop(), dispose() }.
  */
 
-function createNoiseBuffer(ctx, type = 'white', seconds = 2) {
-  const length = Math.floor(ctx.sampleRate * seconds);
-  const buffer = ctx.createBuffer(1, length, ctx.sampleRate);
-  const data = buffer.getChannelData(0);
+export const SOUND_CATEGORIES = [
+  { id: 'nature', title: 'Природа' },
+  { id: 'night', title: 'Ночь' },
+];
 
-  if (type === 'white') {
-    for (let i = 0; i < length; i++) data[i] = Math.random() * 2 - 1;
-  } else if (type === 'pink') {
-    let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0;
-    for (let i = 0; i < length; i++) {
-      const white = Math.random() * 2 - 1;
-      b0 = 0.99886 * b0 + white * 0.0555179;
-      b1 = 0.99332 * b1 + white * 0.0750759;
-      b2 = 0.969 * b2 + white * 0.153852;
-      b3 = 0.8665 * b3 + white * 0.3104856;
-      b4 = 0.55 * b4 + white * 0.5329522;
-      b5 = -0.7616 * b5 - white * 0.016898;
-      data[i] = (b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362) * 0.11;
-      b6 = white * 0.115926;
-    }
-  } else {
-    // brown
-    let last = 0;
-    for (let i = 0; i < length; i++) {
-      const white = Math.random() * 2 - 1;
-      last = (last + 0.02 * white) / 1.02;
-      data[i] = last * 3.5;
+export const SOUND_CATALOG = [
+  { id: 'ocean', title: 'Океан', kind: 'ocean', category: 'nature', slug: 'океан', description: 'Белый шум океана: мягкий прибой и волны. Бесшовная петля для сна, работы и расслабления в микшере Белый шум.' },
+  { id: 'rain', title: 'Дождь', kind: 'rain', category: 'nature', slug: 'дождь', description: 'Звук дождя для сна и концентрации. Спокойный loop дождя — слушайте отдельно или смешайте с другими звуками природы.' },
+  { id: 'stream', title: 'Ручей', kind: 'stream', category: 'nature', slug: 'ручей', description: 'Журчание ручья: лёгкий поток воды. Идеально как фон для чтения, медитации и спокойной работы.' },
+  { id: 'fire', title: 'Огонь', kind: 'fire', category: 'nature', slug: 'огонь', description: 'Треск костра и тёплый огонь. Уютный loop камина для вечера, сна и атмосферы отдыха.' },
+  { id: 'roof', title: 'Дождь на крыше', kind: 'roof', category: 'nature', slug: 'дождь-на-крыше', description: 'Дождь по крыше: плотный шум капель по металлу. Глубокий фон для сна и отключения от города.' },
+  { id: 'forest', title: 'Лес', kind: 'forest', category: 'nature', slug: 'лес', description: 'Лесная атмосфера: птицы, кроны и лёгкий ветер. Погружение в природу без наушников с улицы.' },
+  { id: 'wind', title: 'Ветер', kind: 'wind', category: 'nature', slug: 'ветер', description: 'Ветер в деревьях — мягкий шум листвы. Спокойный природный фон для фокуса и отдыха.' },
+  { id: 'birds', title: 'Птицы', kind: 'birds', category: 'nature', slug: 'птицы', description: 'Пение птиц в лесу. Утренний loop для настроения, работы и тихих пауз.' },
+  { id: 'waterfall', title: 'Водопад', kind: 'waterfall', category: 'nature', slug: 'водопад', description: 'Шум водопада: плотный поток воды. Белый шум природы, который маскирует разговоры и город.' },
+  { id: 'thunder', title: 'Гроза', kind: 'thunder', category: 'nature', slug: 'гроза', description: 'Дождь и гром: грозовая атмосфера. Слушайте раскаты и ливень в безопасном loop.' },
+  { id: 'lake', title: 'Озеро', kind: 'lake', category: 'nature', slug: 'озеро', description: 'Волны озера у берега. Тихий плеск воды для релакса, сна и медитации.' },
+  { id: 'river', title: 'Река', kind: 'river', category: 'nature', slug: 'река', description: 'Течение реки: средний поток воды. Ровный природный шум для концентрации.' },
+  { id: 'leaves', title: 'Листва', kind: 'leaves', category: 'nature', slug: 'листва', description: 'Шелест листвы на ветру. Мягкий лесной фон без резких звуков.' },
+  { id: 'cave', title: 'Пещера', kind: 'cave', category: 'nature', slug: 'пещера', description: 'Пещерная атмосфера: капли, эхо и тишина. Глубокий звук для сна и погружения.' },
+  { id: 'beach', title: 'Пляж', kind: 'beach', category: 'nature', slug: 'пляж', description: 'Берег и спокойный прибой. Пляжный loop волн для отдыха и сна.' },
+  { id: 'frogs', title: 'Лягушки', kind: 'frogs', category: 'nature', slug: 'лягушки', description: 'Лягушки у пруда ночью. Живая природная звуковая картина для вечера.' },
+  { id: 'snow', title: 'Метель', kind: 'snow', category: 'nature', slug: 'метель', description: 'Зимняя метель и ветер. Холодный атмосферный шум снега для фона и сна.' },
+  { id: 'meadow', title: 'Луг', kind: 'meadow', category: 'nature', slug: 'луг', description: 'Луг: птицы и летнее поле. Светлый природный фон для утра и работы.' },
+  { id: 'fountain', title: 'Фонтан', kind: 'fountain', category: 'nature', slug: 'фонтан', description: 'Журчание фонтана. Короткий водяной loop для спокойного фона дома и в офисе.' },
+  { id: 'cicadas', title: 'Цикады', kind: 'cicadas', category: 'nature', slug: 'цикады', description: 'Цикады жарким днём. Летний хор насекомых — плотный белый шум природы.' },
+  { id: 'night', title: 'Сверчок ночью', kind: 'night', category: 'night', slug: 'сверчок-ночью', description: 'Сверчки ночью. Тихий ночной loop для засыпания и спокойного вечера.' },
+  { id: 'quiet', title: 'Тихая ночь', kind: 'quiet', category: 'night', slug: 'тихая-ночь', description: 'Тихая ночь: мягкая ночная атмосфера. Едва слышный фон без резких акцентов.' },
+];
+
+/** @type {Record<string, { url: string, gain: number }>} */
+const SAMPLE_KINDS = {
+  ocean: { url: '/sounds/ocean.mp3', gain: 0.8 },
+  rain: { url: '/sounds/rain.mp3', gain: 0.85 },
+  stream: { url: '/sounds/stream.mp3', gain: 0.75 },
+  fire: { url: '/sounds/fire.mp3', gain: 0.75 },
+  roof: { url: '/sounds/roof.mp3', gain: 0.8 },
+  forest: { url: '/sounds/forest.mp3', gain: 0.75 },
+  wind: { url: '/sounds/wind.mp3', gain: 0.7 },
+  birds: { url: '/sounds/birds.mp3', gain: 0.7 },
+  waterfall: { url: '/sounds/waterfall.mp3', gain: 0.75 },
+  thunder: { url: '/sounds/thunder.mp3', gain: 0.8 },
+  lake: { url: '/sounds/lake.mp3', gain: 0.75 },
+  river: { url: '/sounds/river.mp3', gain: 0.75 },
+  leaves: { url: '/sounds/leaves.mp3', gain: 0.7 },
+  cave: { url: '/sounds/cave.mp3', gain: 0.7 },
+  beach: { url: '/sounds/beach.mp3', gain: 0.75 },
+  frogs: { url: '/sounds/frogs.mp3', gain: 0.7 },
+  snow: { url: '/sounds/blizzard.mp3', gain: 0.85 },
+  meadow: { url: '/sounds/meadow.mp3', gain: 0.7 },
+  fountain: { url: '/sounds/fountain.mp3', gain: 0.7 },
+  cicadas: { url: '/sounds/cicadas.mp3', gain: 0.65 },
+  night: { url: '/sounds/night.mp3', gain: 0.7 },
+  quiet: { url: '/sounds/quiet.mp3', gain: 0.65 },
+};
+
+/** @type {Map<string, AudioBuffer>} */
+const sampleBufferCache = new Map();
+
+export const SOUND_CACHE_NAME = 'zone-sounds';
+
+function soundRequestUrl(url) {
+  return new URL(url, window.location.origin).href;
+}
+
+async function matchSoundCache(url) {
+  if (!('caches' in globalThis)) return null;
+  try {
+    const cache = await caches.open(SOUND_CACHE_NAME);
+    return cache.match(soundRequestUrl(url), { ignoreSearch: true });
+  } catch {
+    return null;
+  }
+}
+
+async function putSoundCache(url, bytes) {
+  if (!('caches' in globalThis)) return;
+  try {
+    const cache = await caches.open(SOUND_CACHE_NAME);
+    await cache.put(
+      soundRequestUrl(url),
+      new Response(bytes, {
+        headers: {
+          'Content-Type': 'audio/mpeg',
+          'Cache-Control': 'public, max-age=31536000, immutable',
+        },
+      }),
+    );
+  } catch (err) {
+    console.warn('Failed to store sound offline', url, err);
+  }
+}
+
+export async function isSoundStored(kind) {
+  const sample = SAMPLE_KINDS[kind];
+  if (!sample) return false;
+  if (sampleBufferCache.has(sample.url)) return true;
+  const hit = await matchSoundCache(sample.url);
+  return Boolean(hit);
+}
+
+async function fetchSoundBytes(url) {
+  const cached = await matchSoundCache(url);
+  if (cached) {
+    try {
+      return await cached.arrayBuffer();
+    } catch {
+      /* fall through to network */
     }
   }
+
+  try {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.arrayBuffer();
+    await putSoundCache(url, data.slice(0));
+    return data;
+  } catch (err) {
+    throw err instanceof Error ? err : new Error(`Failed to load sample: ${url}`);
+  }
+}
+
+function decodeAudioDataCompat(ctx, arrayBuffer) {
+  const data = arrayBuffer.slice(0);
+  return new Promise((resolve, reject) => {
+    let settled = false;
+    const ok = (buf) => {
+      if (settled) return;
+      settled = true;
+      resolve(buf);
+    };
+    const fail = (err) => {
+      if (settled) return;
+      settled = true;
+      reject(err || new Error('decodeAudioData failed'));
+    };
+    try {
+      const result = ctx.decodeAudioData(data, ok, fail);
+      if (result && typeof result.then === 'function') {
+        result.then(ok, fail);
+      }
+    } catch (err) {
+      fail(err);
+    }
+  });
+}
+
+async function getSampleBuffer(ctx, url) {
+  const cached = sampleBufferCache.get(url);
+  if (cached) return cached;
+
+  const data = await fetchSoundBytes(url);
+  const buffer = await decodeAudioDataCompat(ctx, data);
+  sampleBufferCache.set(url, buffer);
   return buffer;
 }
 
-function noiseSource(ctx, type) {
-  const src = ctx.createBufferSource();
-  src.buffer = createNoiseBuffer(ctx, type, 3);
-  src.loop = true;
-  return src;
-}
-
-function makeVoice(ctx, build) {
+function makeSampleVoice(ctx, { url, gain = 0.8 }) {
   const output = ctx.createGain();
   output.gain.value = 1;
   let nodes = [];
   let started = false;
+  /** @type {AudioBuffer | null} */
+  let buffer = null;
 
   const api = {
     connect(dest) {
       output.connect(dest);
       return api;
     },
-    start(when = 0) {
-      if (started) return api;
-      started = true;
-      nodes = build(ctx, output);
-      for (const n of nodes) {
-        if (n.start) n.start(when);
-      }
+    async prepare() {
+      buffer = await getSampleBuffer(ctx, url);
       return api;
     },
-    stop(when = 0) {
+    isPrepared() {
+      return Boolean(buffer);
+    },
+    start() {
+      if (started || !buffer) return api;
+      if (ctx.state === 'suspended' || ctx.state === 'interrupted') {
+        ctx.resume().catch(() => {});
+      }
+      started = true;
+      const src = ctx.createBufferSource();
+      src.buffer = buffer;
+      src.loop = true;
+      src.loopStart = 0;
+      src.loopEnd = buffer.duration;
+      const g = ctx.createGain();
+      g.gain.value = gain;
+      src.connect(g);
+      g.connect(output);
+      const when = Number.isFinite(ctx.currentTime) ? ctx.currentTime : 0;
+      src.start(when);
+      nodes = [src];
+      return api;
+    },
+    stop() {
       for (const n of nodes) {
         try {
-          if (n.stop) n.stop(when);
+          if (n.stop) n.stop();
         } catch {
           /* already stopped */
         }
       }
+      nodes = [];
       started = false;
       return api;
     },
@@ -85,421 +225,51 @@ function makeVoice(ctx, build) {
   return api;
 }
 
-export const SOUND_CATALOG = [
-  { id: 'balanced', title: 'Сбалансированный шум', kind: 'pink' },
-  { id: 'bright', title: 'Светлый шум', kind: 'white' },
-  { id: 'dark', title: 'Темный шум', kind: 'brown' },
-  { id: 'ocean', title: 'Океан', kind: 'ocean' },
-  { id: 'rain', title: 'Дождь', kind: 'rain' },
-  { id: 'stream', title: 'Ручей', kind: 'stream' },
-  { id: 'night', title: 'Ночь', kind: 'night' },
-  { id: 'fire', title: 'Огонь', kind: 'fire' },
-  { id: 'chatter', title: 'Болтовня', kind: 'chatter' },
-  { id: 'steam', title: 'Пар', kind: 'steam' },
-  { id: 'plane', title: 'Самолет', kind: 'plane' },
-  { id: 'boat', title: 'Лодка', kind: 'boat' },
-  { id: 'bus', title: 'Автобус', kind: 'bus' },
-  { id: 'train', title: 'Поезд', kind: 'train' },
-  { id: 'roof', title: 'Дождь на крыше', kind: 'roof' },
-  { id: 'quiet', title: 'Тихая ночь', kind: 'quiet' },
-];
-
-function buildKind(kind, ctx, output) {
-  switch (kind) {
-    case 'white':
-      return buildNoise(ctx, output, 'white', 8000, 0.35);
-    case 'pink':
-      return buildNoise(ctx, output, 'pink', 4000, 0.45);
-    case 'brown':
-      return buildNoise(ctx, output, 'brown', 800, 0.7);
-    case 'ocean':
-      return buildOcean(ctx, output);
-    case 'rain':
-      return buildRain(ctx, output, false);
-    case 'stream':
-      return buildStream(ctx, output);
-    case 'night':
-      return buildNight(ctx, output, false);
-    case 'fire':
-      return buildFire(ctx, output);
-    case 'chatter':
-      return buildChatter(ctx, output);
-    case 'steam':
-      return buildSteam(ctx, output);
-    case 'plane':
-      return buildPlane(ctx, output);
-    case 'boat':
-      return buildBoat(ctx, output);
-    case 'bus':
-      return buildBus(ctx, output);
-    case 'train':
-      return buildTrain(ctx, output);
-    case 'roof':
-      return buildRain(ctx, output, true);
-    case 'quiet':
-      return buildNight(ctx, output, true);
-    default:
-      return buildNoise(ctx, output, 'pink', 4000, 0.4);
-  }
-}
-
-function buildNoise(ctx, output, type, cutoff, gain) {
-  const src = noiseSource(ctx, type);
-  const filter = ctx.createBiquadFilter();
-  filter.type = 'lowpass';
-  filter.frequency.value = cutoff;
-  filter.Q.value = 0.7;
-  const g = ctx.createGain();
-  g.gain.value = gain;
-  src.connect(filter);
-  filter.connect(g);
-  g.connect(output);
-  return [src];
-}
-
-function buildOcean(ctx, output) {
-  const src = noiseSource(ctx, 'pink');
-  const filter = ctx.createBiquadFilter();
-  filter.type = 'lowpass';
-  filter.frequency.value = 600;
-  filter.Q.value = 1.2;
-
-  const lfo = ctx.createOscillator();
-  lfo.type = 'sine';
-  lfo.frequency.value = 0.08;
-  const lfoGain = ctx.createGain();
-  lfoGain.gain.value = 280;
-  lfo.connect(lfoGain);
-  lfoGain.connect(filter.frequency);
-
-  const rumble = ctx.createOscillator();
-  rumble.type = 'sine';
-  rumble.frequency.value = 55;
-  const rumbleGain = ctx.createGain();
-  rumbleGain.gain.value = 0.08;
-
-  const g = ctx.createGain();
-  g.gain.value = 0.55;
-
-  src.connect(filter);
-  filter.connect(g);
-  rumble.connect(rumbleGain);
-  rumbleGain.connect(g);
-  g.connect(output);
-
-  return [src, lfo, rumble];
-}
-
-function buildRain(ctx, output, onRoof) {
-  const src = noiseSource(ctx, 'white');
-  const hp = ctx.createBiquadFilter();
-  hp.type = 'highpass';
-  hp.frequency.value = onRoof ? 900 : 1400;
-  const bp = ctx.createBiquadFilter();
-  bp.type = 'bandpass';
-  bp.frequency.value = onRoof ? 1800 : 3200;
-  bp.Q.value = onRoof ? 0.8 : 0.4;
-
-  if (onRoof) {
-    const resonance = ctx.createBiquadFilter();
-    resonance.type = 'peaking';
-    resonance.frequency.value = 420;
-    resonance.Q.value = 2.5;
-    resonance.gain.value = 6;
-    const g = ctx.createGain();
-    g.gain.value = 0.28;
-    src.connect(hp);
-    hp.connect(bp);
-    bp.connect(resonance);
-    resonance.connect(g);
-    g.connect(output);
-    return [src];
-  }
-
-  const g = ctx.createGain();
-  g.gain.value = 0.22;
-  src.connect(hp);
-  hp.connect(bp);
-  bp.connect(g);
-  g.connect(output);
-  return [src];
-}
-
-function buildStream(ctx, output) {
-  const src = noiseSource(ctx, 'white');
-  const bp = ctx.createBiquadFilter();
-  bp.type = 'bandpass';
-  bp.frequency.value = 1100;
-  bp.Q.value = 0.9;
-
-  const lfo = ctx.createOscillator();
-  lfo.frequency.value = 0.25;
-  const lfoGain = ctx.createGain();
-  lfoGain.gain.value = 400;
-  lfo.connect(lfoGain);
-  lfoGain.connect(bp.frequency);
-
-  const g = ctx.createGain();
-  g.gain.value = 0.2;
-  src.connect(bp);
-  bp.connect(g);
-  g.connect(output);
-  return [src, lfo];
-}
-
-function buildNight(ctx, output, quiet) {
-  const wind = noiseSource(ctx, 'pink');
-  const lp = ctx.createBiquadFilter();
-  lp.type = 'lowpass';
-  lp.frequency.value = quiet ? 350 : 500;
-  const windGain = ctx.createGain();
-  windGain.gain.value = quiet ? 0.12 : 0.18;
-
-  wind.connect(lp);
-  lp.connect(windGain);
-  windGain.connect(output);
-
-  const nodes = [wind];
-
-  if (!quiet) {
-    // Soft cricket-like chirps via amplitude-modulated oscillators
-    for (let i = 0; i < 3; i++) {
-      const osc = ctx.createOscillator();
-      osc.type = 'sine';
-      osc.frequency.value = 3200 + i * 420;
-      const am = ctx.createOscillator();
-      am.frequency.value = 18 + i * 3;
-      const amGain = ctx.createGain();
-      amGain.gain.value = 0.015;
-      const chirp = ctx.createGain();
-      chirp.gain.value = 0;
-      am.connect(amGain);
-      amGain.connect(chirp.gain);
-      osc.connect(chirp);
-      chirp.connect(output);
-
-      // Slow envelope LFO for sparse chirps
-      const env = ctx.createOscillator();
-      env.frequency.value = 0.12 + i * 0.04;
-      const envDepth = ctx.createGain();
-      envDepth.gain.value = 0.012;
-      env.connect(envDepth);
-      envDepth.connect(chirp.gain);
-
-      nodes.push(osc, am, env);
-    }
-  }
-
-  return nodes;
-}
-
-function buildFire(ctx, output) {
-  const src = noiseSource(ctx, 'pink');
-  const bp = ctx.createBiquadFilter();
-  bp.type = 'bandpass';
-  bp.frequency.value = 400;
-  bp.Q.value = 0.6;
-
-  const crackle = noiseSource(ctx, 'white');
-  const hp = ctx.createBiquadFilter();
-  hp.type = 'highpass';
-  hp.frequency.value = 2000;
-  const crackleGain = ctx.createGain();
-  crackleGain.gain.value = 0.08;
-
-  // Random crackle amplitude via LFO-ish noise modulation
-  const mod = ctx.createOscillator();
-  mod.type = 'square';
-  mod.frequency.value = 2.7;
-  const modGain = ctx.createGain();
-  modGain.gain.value = 0.06;
-  mod.connect(modGain);
-  modGain.connect(crackleGain.gain);
-
-  const rumble = ctx.createOscillator();
-  rumble.type = 'sine';
-  rumble.frequency.value = 70;
-  const rumbleGain = ctx.createGain();
-  rumbleGain.gain.value = 0.05;
-
-  const g = ctx.createGain();
-  g.gain.value = 0.45;
-
-  src.connect(bp);
-  bp.connect(g);
-  crackle.connect(hp);
-  hp.connect(crackleGain);
-  crackleGain.connect(g);
-  rumble.connect(rumbleGain);
-  rumbleGain.connect(g);
-  g.connect(output);
-
-  return [src, crackle, mod, rumble];
-}
-
-function buildChatter(ctx, output) {
-  const src = noiseSource(ctx, 'pink');
-  const bp1 = ctx.createBiquadFilter();
-  bp1.type = 'bandpass';
-  bp1.frequency.value = 700;
-  bp1.Q.value = 2;
-  const bp2 = ctx.createBiquadFilter();
-  bp2.type = 'bandpass';
-  bp2.frequency.value = 1400;
-  bp2.Q.value = 1.5;
-
-  const lfo = ctx.createOscillator();
-  lfo.type = 'sine';
-  lfo.frequency.value = 2.4;
-  const lfoGain = ctx.createGain();
-  lfoGain.gain.value = 0.12;
-  const g = ctx.createGain();
-  g.gain.value = 0.18;
-  lfo.connect(lfoGain);
-  lfoGain.connect(g.gain);
-
-  src.connect(bp1);
-  bp1.connect(bp2);
-  bp2.connect(g);
-  g.connect(output);
-  return [src, lfo];
-}
-
-function buildSteam(ctx, output) {
-  const src = noiseSource(ctx, 'white');
-  const hp = ctx.createBiquadFilter();
-  hp.type = 'highpass';
-  hp.frequency.value = 2800;
-  const g = ctx.createGain();
-  g.gain.value = 0.12;
-  src.connect(hp);
-  hp.connect(g);
-  g.connect(output);
-  return [src];
-}
-
-function buildPlane(ctx, output) {
-  const drone = ctx.createOscillator();
-  drone.type = 'sawtooth';
-  drone.frequency.value = 85;
-  const droneFilter = ctx.createBiquadFilter();
-  droneFilter.type = 'lowpass';
-  droneFilter.frequency.value = 220;
-  const droneGain = ctx.createGain();
-  droneGain.gain.value = 0.07;
-
-  const cabin = noiseSource(ctx, 'pink');
-  const cabinFilter = ctx.createBiquadFilter();
-  cabinFilter.type = 'lowpass';
-  cabinFilter.frequency.value = 400;
-  const cabinGain = ctx.createGain();
-  cabinGain.gain.value = 0.35;
-
-  drone.connect(droneFilter);
-  droneFilter.connect(droneGain);
-  droneGain.connect(output);
-  cabin.connect(cabinFilter);
-  cabinFilter.connect(cabinGain);
-  cabinGain.connect(output);
-
-  return [drone, cabin];
-}
-
-function buildBoat(ctx, output) {
-  const engine = ctx.createOscillator();
-  engine.type = 'sine';
-  engine.frequency.value = 48;
-  const engGain = ctx.createGain();
-  engGain.gain.value = 0.1;
-
-  const water = noiseSource(ctx, 'pink');
-  const bp = ctx.createBiquadFilter();
-  bp.type = 'bandpass';
-  bp.frequency.value = 500;
-  bp.Q.value = 0.7;
-  const waterGain = ctx.createGain();
-  waterGain.gain.value = 0.22;
-
-  const lfo = ctx.createOscillator();
-  lfo.frequency.value = 0.15;
-  const lfoGain = ctx.createGain();
-  lfoGain.gain.value = 0.08;
-  lfo.connect(lfoGain);
-  lfoGain.connect(waterGain.gain);
-
-  engine.connect(engGain);
-  engGain.connect(output);
-  water.connect(bp);
-  bp.connect(waterGain);
-  waterGain.connect(output);
-
-  return [engine, water, lfo];
-}
-
-function buildBus(ctx, output) {
-  const engine = ctx.createOscillator();
-  engine.type = 'sawtooth';
-  engine.frequency.value = 42;
-  const filter = ctx.createBiquadFilter();
-  filter.type = 'lowpass';
-  filter.frequency.value = 160;
-  const engGain = ctx.createGain();
-  engGain.gain.value = 0.08;
-
-  const road = noiseSource(ctx, 'brown');
-  const roadGain = ctx.createGain();
-  roadGain.gain.value = 0.4;
-
-  engine.connect(filter);
-  filter.connect(engGain);
-  engGain.connect(output);
-  road.connect(roadGain);
-  roadGain.connect(output);
-
-  return [engine, road];
-}
-
-function buildTrain(ctx, output) {
-  const rumble = noiseSource(ctx, 'brown');
-  const rumbleGain = ctx.createGain();
-  rumbleGain.gain.value = 0.35;
-
-  // Rhythmic clack via amplitude-gated noise bursts
-  const click = noiseSource(ctx, 'white');
-  const clickHp = ctx.createBiquadFilter();
-  clickHp.type = 'bandpass';
-  clickHp.frequency.value = 900;
-  clickHp.Q.value = 4;
-  const clickGain = ctx.createGain();
-  clickGain.gain.value = 0;
-
-  const pulse = ctx.createOscillator();
-  pulse.type = 'square';
-  pulse.frequency.value = 3.2;
-  const pulseDepth = ctx.createGain();
-  pulseDepth.gain.value = 0.1;
-  pulse.connect(pulseDepth);
-  pulseDepth.connect(clickGain.gain);
-
-  const air = noiseSource(ctx, 'pink');
-  const airFilter = ctx.createBiquadFilter();
-  airFilter.type = 'highpass';
-  airFilter.frequency.value = 1500;
-  const airGain = ctx.createGain();
-  airGain.gain.value = 0.06;
-
-  rumble.connect(rumbleGain);
-  rumbleGain.connect(output);
-  click.connect(clickHp);
-  clickHp.connect(clickGain);
-  clickGain.connect(output);
-  air.connect(airFilter);
-  airFilter.connect(airGain);
-  airGain.connect(output);
-
-  return [rumble, click, pulse, air];
+export function isSampleCached(kind) {
+  const sample = SAMPLE_KINDS[kind];
+  return Boolean(sample && sampleBufferCache.has(sample.url));
 }
 
 export function createSoundVoice(ctx, kind) {
-  return makeVoice(ctx, (c, out) => buildKind(kind, c, out));
+  const sample = SAMPLE_KINDS[kind];
+  if (!sample) {
+    throw new Error(`Unknown sound kind: ${kind}`);
+  }
+  return makeSampleVoice(ctx, sample);
+}
+
+export function getSoundById(id) {
+  return SOUND_CATALOG.find((s) => s.id === id) ?? null;
+}
+
+export function getSoundBySlug(slug) {
+  if (!slug) return null;
+  let decoded = slug;
+  try {
+    decoded = decodeURIComponent(slug);
+  } catch {
+    decoded = slug;
+  }
+  return (
+    SOUND_CATALOG.find(
+      (s) => s.slug === decoded || s.slug === slug || s.id === decoded || s.id === slug,
+    ) ?? null
+  );
+}
+
+export function soundPagePath(soundOrKey) {
+  const key = typeof soundOrKey === 'string' ? soundOrKey : soundOrKey?.id;
+  const sound = getSoundById(key) || getSoundBySlug(key) || soundOrKey;
+  const id = typeof sound === 'object' && sound?.id ? sound.id : key;
+  return `/sounds/${id}`;
+}
+
+/** Warm common buffers after first user gesture. */
+export async function preloadSamples(ctx, kinds = Object.keys(SAMPLE_KINDS)) {
+  await Promise.all(
+    kinds.map(async (kind) => {
+      const sample = SAMPLE_KINDS[kind];
+      if (sample) await getSampleBuffer(ctx, sample.url);
+    }),
+  );
 }

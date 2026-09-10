@@ -1,0 +1,242 @@
+{
+  "ocean": {
+    "id": "852826",
+    "title": "Gentle Ocean Waves Loop",
+    "username": "kkenny101",
+    "license": "CC0",
+    "url": "https://freesound.org/people/kkenny101/sounds/852826/",
+    "file": "/sounds/ocean.mp3",
+    "query": "ocean waves loop",
+    "rating": 22.0,
+    "downloads": 379,
+    "duration": 21.7699
+  },
+  "rain": {
+    "id": "177479",
+    "title": "Slowly Raining Loop",
+    "username": "unfa",
+    "license": "CC0",
+    "url": "https://freesound.org/people/unfa/sounds/177479/",
+    "file": "/sounds/rain.mp3",
+    "query": "rain loop",
+    "rating": 36.0,
+    "downloads": 1770,
+    "duration": 73.4155
+  },
+  "stream": {
+    "id": "548373",
+    "title": "Ambiance_Stream_Calm_Loop_Stereo.wav",
+    "username": "Nox_Sound",
+    "license": "CC0",
+    "url": "https://freesound.org/people/Nox_Sound/sounds/548373/",
+    "file": "/sounds/stream.mp3",
+    "query": "stream river loop",
+    "rating": 28.0,
+    "downloads": 928,
+    "duration": 29.9281
+  },
+  "fire": {
+    "id": "729395",
+    "title": "Campfire 01",
+    "username": "HECKFRICKER",
+    "license": "CC0",
+    "url": "https://freesound.org/people/HECKFRICKER/sounds/729395/",
+    "file": "/sounds/fire.mp3",
+    "query": "fireplace fire crackling loop",
+    "rating": 51.0,
+    "downloads": 1201,
+    "duration": 108.999
+  },
+  "roof": {
+    "id": "239939",
+    "title": "Rain falling on a metal roof - 96 kHz / 24 Bit",
+    "username": "GregorQuendel",
+    "license": "CC0",
+    "url": "https://freesound.org/people/GregorQuendel/sounds/239939/",
+    "file": "/sounds/roof.mp3",
+    "query": "rain on roof",
+    "downloads": 1100,
+    "duration": 72.704
+  },
+  "forest": {
+    "id": "570492",
+    "title": "Ambiance_Natural_Forest_Birds_Wind_Loop_Stereo.wav",
+    "username": "Nox_Sound",
+    "license": "CC0",
+    "url": "https://freesound.org/people/Nox_Sound/sounds/570492/",
+    "file": "/sounds/forest.mp3",
+    "query": "forest birds wind loop",
+    "rating": 22.0,
+    "duration": 29.921
+  },
+  "wind": {
+    "id": "506910",
+    "title": "Ambiance_Wind_Forest_Calm_Loop_Stereo.wav",
+    "username": "Nox_Sound",
+    "license": "CC0",
+    "url": "https://freesound.org/people/Nox_Sound/sounds/506910/",
+    "file": "/sounds/wind.mp3",
+    "query": "wind forest loop",
+    "rating": 34.0,
+    "duration": 25.153
+  },
+  "birds": {
+    "id": "723913",
+    "title": "Forest birds - ambient seamless loop",
+    "username": "Magnesus",
+    "license": "CC0",
+    "url": "https://freesound.org/people/Magnesus/sounds/723913/",
+    "file": "/sounds/birds.mp3",
+    "query": "forest birds seamless loop",
+    "rating": 7.0,
+    "duration": 27.051
+  },
+  "waterfall": {
+    "id": "511077",
+    "title": "Ambiance_Waterfall_Loop_02.wav",
+    "username": "Nox_Sound",
+    "license": "CC0",
+    "url": "https://freesound.org/people/Nox_Sound/sounds/511077/",
+    "file": "/sounds/waterfall.mp3",
+    "query": "waterfall loop",
+    "rating": 35.0,
+    "duration": 29.262
+  },
+  "thunder": {
+    "id": "700358",
+    "title": "Rain and Thunder Ambience",
+    "username": "sagamusix",
+    "license": "CC0",
+    "url": "https://freesound.org/people/sagamusix/sounds/700358/",
+    "file": "/sounds/thunder.mp3",
+    "query": "thunder rain loop",
+    "rating": 17.0,
+    "duration": 190.941
+  },
+  "lake": {
+    "id": "573191",
+    "title": "Waves gentle med cu lake water TTP 24-96 180618.wav",
+    "username": "TRP",
+    "license": "CC0",
+    "url": "https://freesound.org/people/TRP/sounds/573191/",
+    "file": "/sounds/lake.mp3",
+    "query": "lake waves loop",
+    "duration": 94.39
+  },
+  "river": {
+    "id": "479322",
+    "title": "Ambiance_River_Flow_Medium_Loop_Stereo.wav",
+    "username": "Nox_Sound",
+    "license": "CC0",
+    "url": "https://freesound.org/people/Nox_Sound/sounds/479322/",
+    "file": "/sounds/river.mp3",
+    "query": "river loop",
+    "duration": 24.777
+  },
+  "leaves": {
+    "id": "546759",
+    "title": "Ambiance_Wind_Trees_Leaves_Moderate_Loop_Stereo.wav",
+    "username": "Nox_Sound",
+    "license": "CC0",
+    "url": "https://freesound.org/people/Nox_Sound/sounds/546759/",
+    "file": "/sounds/leaves.mp3",
+    "query": "leaves wind loop",
+    "rating": 26.0,
+    "duration": 30.003
+  },
+  "cave": {
+    "id": "553080",
+    "title": "Ambiance_Atmosphere_Cave_Loop_Stereo.ogg",
+    "username": "Nox_Sound",
+    "license": "CC0",
+    "url": "https://freesound.org/people/Nox_Sound/sounds/553080/",
+    "file": "/sounds/cave.mp3",
+    "query": "cave drip loop",
+    "rating": 58.0,
+    "duration": 57.0
+  },
+  "beach": {
+    "id": "788731",
+    "title": "Calm Gentle Beach Shore (Loopable)",
+    "username": "Geoff-Bremner-Audio",
+    "license": "CC0",
+    "url": "https://freesound.org/people/Geoff-Bremner-Audio/sounds/788731/",
+    "file": "/sounds/beach.mp3",
+    "query": "beach shore loop",
+    "duration": 28.199
+  },
+  "frogs": {
+    "id": "813256",
+    "title": "Spring Night Frogs (loop)",
+    "username": "NickTayloe",
+    "license": "CC0",
+    "url": "https://freesound.org/people/NickTayloe/sounds/813256/",
+    "file": "/sounds/frogs.mp3",
+    "query": "frogs pond loop",
+    "duration": 73.375
+  },
+  "snow": {
+    "id": "754256",
+    "title": "Winter Snowstorm Ambience",
+    "username": "HECKFRICKER",
+    "license": "CC0",
+    "url": "https://freesound.org/people/HECKFRICKER/sounds/754256/",
+    "file": "/sounds/blizzard.mp3",
+    "query": "snow blizzard loop",
+    "rating": 35.0,
+    "duration": 183.671
+  },
+  "meadow": {
+    "id": "425378",
+    "title": "Meadow Cuckoo In Background And Birds High Pitch Mono Loop.wav",
+    "username": "Soundholder",
+    "license": "CC0",
+    "url": "https://freesound.org/people/Soundholder/sounds/425378/",
+    "file": "/sounds/meadow.mp3",
+    "query": "meadow birds loop",
+    "duration": 51.441
+  },
+  "fountain": {
+    "id": "676173",
+    "title": "Ambiance_Fountain_Small_Loop_Stereo.wav",
+    "username": "Nox_Sound",
+    "license": "CC0",
+    "url": "https://freesound.org/people/Nox_Sound/sounds/676173/",
+    "file": "/sounds/fountain.mp3",
+    "query": "fountain loop",
+    "duration": 9.999
+  },
+  "cicadas": {
+    "id": "515055",
+    "title": "Ambiance_Cicadas_Loop_01.wav",
+    "username": "Nox_Sound",
+    "license": "CC0",
+    "url": "https://freesound.org/people/Nox_Sound/sounds/515055/",
+    "file": "/sounds/cicadas.mp3",
+    "query": "cicadas loop",
+    "rating": 14.0,
+    "duration": 24.565
+  },
+  "night": {
+    "id": "536930",
+    "title": "Cricket Ambience, Remix, A",
+    "username": "Moulaythami",
+    "license": "CC-BY",
+    "url": "https://freesound.org/people/Moulaythami/sounds/536930/",
+    "file": "/sounds/night.mp3",
+    "query": "night ambience crickets",
+    "downloads": 1956,
+    "duration": 92.16
+  },
+  "quiet": {
+    "id": "248103",
+    "title": "Night Ambiance - 44.1k, 16-Bit Depth.aif",
+    "username": "DidntGoToFilmSchool",
+    "license": "CC0",
+    "url": "https://freesound.org/people/DidntGoToFilmSchool/sounds/248103/",
+    "file": "/sounds/quiet.mp3",
+    "query": "night crickets loop",
+    "downloads": 1496,
+    "duration": 19.5
+  }
+}

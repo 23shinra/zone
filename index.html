@@ -4,24 +4,102 @@
     <meta charset="UTF-8" />
     <meta
       name="viewport"
-      content="width=device-width, initial-scale=1, viewport-fit=cover"
+      content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"
     />
-    <meta name="theme-color" content="#F7F6F3" />
+    <meta name="theme-color" content="#f4f8fc" id="theme-color" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Зона" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="description" content="Спокойные звуки. Наложи несколько — слушай свой микс." />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://zone.esl.kz/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Белый шум" />
+    <meta property="og:locale" content="ru_RU" />
+    <meta property="og:title" content="Белый шум — спокойные звуки природы" />
+    <meta property="og:description" content="Спокойные звуки. Наложи несколько — слушай свой микс." />
+    <meta property="og:url" content="https://zone.esl.kz/" />
+    <meta property="og:image" content="https://zone.esl.kz/icons/icon-512.png" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Белый шум — спокойные звуки природы" />
+    <meta name="twitter:description" content="Спокойные звуки. Наложи несколько — слушай свой микс." />
+    <meta name="twitter:image" content="https://zone.esl.kz/icons/icon-512.png" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="apple-touch-icon" href="/icons/icon-192.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Manrope:wght@400;500;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
-    <title>Зона</title>
+    <title>Белый шум — спокойные звуки природы</title>
+    <script type="application/ld+json" id="schema-ld">
+      {
+        "@context": "https://schema.org",
+        "@type": ["WebApplication", "SoftwareApplication"],
+        "@id": "https://zone.esl.kz/#app",
+        "name": "Белый шум",
+        "alternateName": "Зона",
+        "url": "https://zone.esl.kz/",
+        "description": "Спокойные звуки. Наложи несколько — слушай свой микс.",
+        "applicationCategory": "MultimediaApplication",
+        "operatingSystem": "Any",
+        "inLanguage": "ru",
+        "browserRequirements": "Requires JavaScript. Requires HTML5.",
+        "image": "https://zone.esl.kz/icons/icon-512.png",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "KZT"
+        },
+        "featureList": [
+          "Микшер звуков природы",
+          "Пресеты и избранное",
+          "Таймер сна",
+          "Офлайн PWA"
+        ]
+      }
+    </script>
+    <script>
+      try {
+        var theme = localStorage.getItem('zone.theme');
+        if (theme === 'dark' || theme === 'light') {
+          document.documentElement.dataset.theme = theme;
+        }
+      } catch (e) {}
+    </script>
+    <script>
+      (function () {
+        var VER = 'chrome-layout-v9';
+        try {
+          if (localStorage.getItem('zone.chrome') === VER) return;
+          localStorage.setItem('zone.chrome', VER);
+        } catch (e) {}
+        var reload = function () {
+          location.replace(location.pathname + location.search + location.hash);
+        };
+        var chain = Promise.resolve();
+        if ('serviceWorker' in navigator) {
+          chain = navigator.serviceWorker.getRegistrations().then(function (regs) {
+            return Promise.all(regs.map(function (r) { return r.unregister(); }));
+          });
+        }
+        chain
+          .then(function () {
+            if (!('caches' in window)) return;
+            return caches.keys().then(function (keys) {
+              return Promise.all(keys.map(function (k) { return caches.delete(k); }));
+            });
+          })
+          .then(reload)
+          .catch(reload);
+      })();
+    </script>
   </head>
   <body>
+    <header id="topbar-root" class="topbar" aria-label="Шапка"></header>
     <div id="app"></div>
+    <div id="dock-root" class="dock"></div>
     <script type="module" src="/src/main.js"></script>
   </body>
 </html>
